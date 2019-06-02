@@ -50,6 +50,7 @@ sysctl --system
 * 重開機吧 reboot
 
 # 建立叢集
+## Master建立  
 1. Master節點初始化
 ```
 kubeadm init --pod-network-cidr=10.244.0.0/16
@@ -90,7 +91,8 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 ```
 這邊使用flannel的CNI
 kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/62e44c867a2846fefb68bd5f178daf4da3095ccb/Documentation/kube-flannel.yml
-```
+```  
+## Node建立
 
 
 ### 參考資料 ###
