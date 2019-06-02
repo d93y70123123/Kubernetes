@@ -39,8 +39,10 @@ systemctl enable kubelet
 6. 確保網路不會被iptables略過
 ```
 vim /etc/sysctl.d/k8s.conf
+
 net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables = 1
+
 sysctl --system
 ```
 *這邊因為還沒初始化的關係，kubelet會啟動失敗  
