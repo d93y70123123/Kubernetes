@@ -4,8 +4,17 @@
 [id]: https://github.com/d93y70123123/Kubernetes/blob/master/kubernetes-logo.png "123"  
 Kubernetes（常簡稱為K8s），是用於自動部署、擴展和管理容器化（containerized）應用程式的開源系統。主要提供「跨主機集群的自動部署、擴展以及運行應用程式容器的平台」。  
 # K8S的架構
-Master:
-Node:  
+Master負責協調叢集，其中主要腳色:  
+* API server : 所有的 K8s 操作都是透過 API Server。   
+* etcd : 負責與 API Server 溝通。  
+* k8s-schedule : 進行調度，分配最適合的 Node 來執行 Container。
+* controller-manager : 負責所有的控制功能。  
+
+Node負責執行應用程式，其中主要腳色:  
+* kubelet : 安裝於每一個 Node 上，負責與 API Server 溝通。  
+* kube-proxy : 提供給 kubectl 或 kubelet 進行 API Server 連線 。  
+* container runtime : 就是容器啦，像是:docker。  
+
 # 安裝K8S
 ### 安裝注意事項
 * CPU至少兩個
