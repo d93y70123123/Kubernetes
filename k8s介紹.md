@@ -1,9 +1,10 @@
 # Kubernetes
 ![alt K8S][id]
 
-[id]: https://github.com/d93y70123123/Kubernetes/blob/master/kubernetes-logo.png "123"  
+[id]: https://github.com/d93y70123123/Kubernetes/blob/master/kubernetes-logo.png "logo"  
 Kubernetes（常簡稱為K8s），是用於自動部署、擴展和管理容器化（containerized）應用程式的開源系統。主要提供「跨主機集群的自動部署、擴展以及運行應用程式容器的平台」。  
 # K8S的架構
+![alt K8S-archtecture](https://github.com/d93y70123123/Kubernetes/blob/master/kubernetes-archtecture.jpg "archtecture")  
 Master負責協調叢集，其中主要腳色:  
 * API server : 所有的 K8s 操作都是透過 API Server。   
 * etcd : 負責與 API Server 溝通。  
@@ -23,7 +24,7 @@ Node負責執行應用程式，其中主要腳色:
 * cluster內的網路必須接通
 ***
 1. 新增容器庫
-```
+```bash
 [kubernetes]
 name=Kubernetes
 baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
@@ -37,16 +38,16 @@ exclude=kube*
   查看selinux狀態 : getenforce
 3. yum update
 4. 安裝 kubelet kubeadm kubectl
-```
+```bash
 yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
 ```
 5. 啟動kubelet
-```
+```bash
 systemctl start kubelet
 systemctl enable kubelet
 ```
 6. 確保網路不會被iptables略過
-```
+```bash
 vim /etc/sysctl.d/k8s.conf
 
 net.bridge.bridge-nf-call-ip6tables = 1
@@ -91,7 +92,7 @@ kubeadm token list
 openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //'
 ```
 3. 為Master節點建立幾個檔案
-```
+```bash
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
@@ -102,8 +103,9 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/62e44c867a2846fefb68bd5f178daf4da3095ccb/Documentation/kube-flannel.yml
 ```  
 ## Node建立
-重複安裝的步驟，可以將下面的指令段落做成腳本執行
-```
+重複安裝的步驟，可以將下面的指令段落做成腳本執行  
+`*每個節點都要做` 
+```bash
 hostnamectl set-hostname k8s1
 cat <<EOF > /etc/yum.repos.d/kubernetes.repo
 [kubernetes]
