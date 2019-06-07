@@ -137,6 +137,10 @@ EOF
 sysctl --system
 ```
 
+## 部屬環境
+pod：最小單位
+
+
 ### 參考資料 ###
 * K8S建立：https://kubernetes.io/docs/setup/independent/install-kubeadm/  
 
