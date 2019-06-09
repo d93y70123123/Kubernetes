@@ -59,6 +59,10 @@ sysctl --system
 
 * 重開機吧 reboot
 
+## 簡單介紹k8s的兩個主要指令
+* kubeadm：建立節點必備，可以快速幫助你建立 Master 以及增加 Node
+* kubectl：負責溝通整個叢集的工具，可以利用它管理以及建立 k8s 的最小單位 "pod"等功能。
+
 # 建立叢集
 ## Master建立  
 1. Master節點初始化
@@ -99,10 +103,17 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 ```
 4. 為所有的POD建立可以互相溝通的網路
 ```
-這邊使用flannel的CNI
+*這邊使用flannel的CNI
 kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/62e44c867a2846fefb68bd5f178daf4da3095ccb/Documentation/kube-flannel.yml
 ```  
 ## Node建立
+安裝docker 
+```bash
+wget https://download.docker.com/linux/centos/docker-ce.repo -P /etc/yum.repos.d/
+yum install docker-ce docker-ce-cli containerd.io
+systetmctl start docker
+systetmctl enable docker
+```
 重複安裝的步驟，可以將下面的指令段落做成腳本執行  
 `*每個節點都要做` 
 ```bash
@@ -139,8 +150,34 @@ sysctl --system
 
 ## 部屬環境
 pod：最小單位，可用來創建和部署的單元。
-pod可以單獨運行一個容器也可以運行多個容器，運行多個容器時共用 IP 以及 儲存的資源。
+pod可以單獨運行一個容器也可以運行多個容器，運行多個容器時共用 "IP" 以及 "儲存的資源"。
 ![alt k8s](https://github.com/d93y70123123/Kubernetes/blob/master/module_03_nodes.svg "pods")
+pod的可以用指令建立或是yaml、json建立，這邊用yaml檔來建立pod：  
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hello-kubernetes
+  labels:
+    app: webserver
+spec:
+  containers:
+  - name: my-k8s
+    image: nginx
+```
+建立 pod
+```bash
+kubectl create -f myk8s.yaml
+...建立成功後
+pod/hello-kubernetes created
+```
+確認 pod 有沒有活著
+```bash
+kubectl get pods
+
+NAME               READY   STATUS    RESTARTS   AGE
+hello-kubernetes   1/1     Running   0          32s
+```
 
 ### 參考資料 ###
 * K8S建立：https://kubernetes.io/docs/setup/independent/install-kubeadm/  
