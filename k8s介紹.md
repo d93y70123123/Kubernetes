@@ -150,8 +150,8 @@ sysctl --system
 
 ## 部屬環境
 pod：最小單位，可用來創建和部署的單元。
-pod可以單獨運行一個容器也可以運行多個容器，運行多個容器時共用 "IP" 以及 "儲存的資源"。
-![alt k8s](https://github.com/d93y70123123/Kubernetes/blob/master/module_03_nodes.svg "pods")
+pod可以單獨運行一個容器也可以運行多個容器，運行多個容器時共用 "IP" 以及 "儲存的資源"。  
+![alt k8s](https://github.com/d93y70123123/Kubernetes/blob/master/module_03_nodes.svg "pods")  
 pod的可以用指令建立或是yaml、json建立，這邊用yaml檔來建立pod：  
 ```yaml
 apiVersion: v1
@@ -165,19 +165,67 @@ spec:
   - name: my-k8s
     image: nginx
 ```
-建立 pod
+1. 建立 pod
 ```bash
-kubectl create -f myk8s.yaml
+$ kubectl create -f myk8s.yaml
 ...建立成功後
 pod/hello-kubernetes created
 ```
-確認 pod 有沒有活著
+2. 確認 pod 有沒有活著
 ```bash
-kubectl get pods
+$ kubectl get pods
 
 NAME               READY   STATUS    RESTARTS   AGE
 hello-kubernetes   1/1     Running   0          32s
 ```
+3. 讓外部與 pod 連線  
+```
+$ kubectl expose pods hello-kubernetes --type="NodePort" --port=80
+
+service/hello-kubernetes exposed
+```
+4. 查看、指令對外開啟的 port
+```
+$ kubectl get service
+
+NAME               TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+hello-kubernetes   NodePort    10.102.55.116   <none>        80:32136/TCP   74s
+kubernetes         ClusterIP   10.96.0.1       <none>        443/TCP        8d
+
+$ kubectl edit service hello-kubernetes
+... 接著會進入編輯模式，跟 vim 大同小異
+# Please edit the object below. Lines beginning with a '#' will be ignored,
+# and an empty file will abort the edit. If an error occurs while saving this file will be
+# reopened with the relevant failures.
+#
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: "2019-06-09T16:26:55Z"
+  labels:
+    app: webserver
+  name: hello-kubernetes
+  namespace: default
+  resourceVersion: "972631"
+  selfLink: /api/v1/namespaces/default/services/hello-kubernetes
+  uid: 65506bf5-8ad3-11e9-bdb0-14dae957dc6b
+spec:
+  clusterIP: 10.102.55.116
+  externalTrafficPolicy: Cluster
+  ports:
+  - nodePort: 32136
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: webserver
+  sessionAffinity: None
+  type: NodePort
+status:
+  loadBalancer: {}
+
+```
+<p style="color:red;">asdasd<p>
 
 ### 參考資料 ###
 * K8S建立：https://kubernetes.io/docs/setup/independent/install-kubeadm/  
