@@ -139,7 +139,7 @@ sysctl --system
 
 ## 部屬環境
 pod：最小單位
-
+![alt k8s](https://github.com/d93y70123123/Kubernetes/blob/master/module_03_nodes.svg "pods")
 
 ### 參考資料 ###
 * K8S建立：https://kubernetes.io/docs/setup/independent/install-kubeadm/  
