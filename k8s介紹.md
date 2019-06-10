@@ -147,10 +147,15 @@ yum install docker-ce docker-ce-cli containerd.io
 systetmctl start docker
 systetmctl enable docker
 ```
+
 重複安裝的步驟，可以將下面的指令段落做成腳本執行  
 `*每個節點都要做` 
 ```bash
-hostnamectl set-hostname k8s1
+#!/bin/bash
+
+hostnamectl set-hostname [改節點的名稱]
+
+# create k8s's repo
 cat <<EOF > /etc/yum.repos.d/kubernetes.repo
 [kubernetes]
 name=Kubernetes
@@ -162,23 +167,25 @@ gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cl
 exclude=kube*
 EOF
 
-# Set SELinux in permissive mode (effectively disabling it)
+# Set SELinux in permissive mode
 setenforce 0
 sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
 
+# close swap
 swapoff -a
-
 sed -i 's/\/dev\/mapper\/centos-swap/#\/dev\/mapper\/centos-swap/g' /etc/fstab
 
-yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
-
-systemctl enable --now kubelet
-
+# set bridge for k8s
 cat <<EOF >  /etc/sysctl.d/k8s.conf
 net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables = 1
 EOF
-sysctl --system
+
+yum update -y
+
+# install k8s
+yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
+systemctl enable --now kubelet
 ```
 
 ## 用k8s製作容器
