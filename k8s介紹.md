@@ -213,7 +213,7 @@ spec:
   clusterIP: 10.102.55.116
   externalTrafficPolicy: Cluster
   ports:
-  - nodePort: 32136
+  - nodePort: (30000-32767)
     port: 80
     protocol: TCP
     targetPort: 80
@@ -223,10 +223,30 @@ spec:
   type: NodePort
 status:
   loadBalancer: {}
-
 ```
-<p style="color:red;">asdasd<p>
+5. 接著就可以從外部連接上container
+http://自己的IP:port
 
+## 安裝 dashboard
+dashboard 是k8s的附加元件，可以讓k8s在網頁上監控及管理。
+1. 建立 dashboard 相關服務
+```bash
+$ kubectl create -f https://raw.githubusercontent.com/kubernetes/dashboard/v1.10.1/src/deploy/alternative/kubernetes-dashboard.yaml
+
+serviceaccount/kubernetes-dashboard created
+role.rbac.authorization.k8s.io/kubernetes-dashboard-minimal created
+rolebinding.rbac.authorization.k8s.io/kubernetes-dashboard-minimal created
+deployment.apps/kubernetes-dashboard created
+service/kubernetes-dashboard created
+```
+2. 看 dashboard 將port開在哪
+```bash
+$ kubectl get service -n kube-system
+
+NAME                   TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)                  AGE
+kube-dns               ClusterIP   10.96.0.10     <none>        53/UDP,53/TCP,9153/TCP   8d
+kubernetes-dashboard   NodePort    10.103.165.8   <none>        80:30773/TCP             4m2s
+```
 ### 參考資料 ###
 * K8S建立：https://kubernetes.io/docs/setup/independent/install-kubeadm/  
 
