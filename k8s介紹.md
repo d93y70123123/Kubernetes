@@ -31,9 +31,13 @@ Node負責執行應用程式，其中主要腳色:
 * 記憶體至少2G
 * SWAP必須禁用
 * cluster內的網路必須接通
+* 節點的MAC以及productID不要一樣 ( cat /sys/class/dmi/id/product_uuid )
 ***
-1. 新增容器庫
+1. 修改hostname
+
+2. 新增容器庫
 ```bash
+$ vim /etc/yum.repos.d/kubernetes.repo
 [kubernetes]
 name=Kubernetes
 baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
@@ -43,19 +47,19 @@ repo_gpgcheck=1
 gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
 exclude=kube*
 ```
-2. 將selinux設置成permissive  
+3. 將selinux設置成permissive  
   查看selinux狀態 : getenforce
-3. yum update
-4. 安裝 kubelet kubeadm kubectl
+4. yum update
+5. 安裝 kubelet kubeadm kubectl
 ```bash
 yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
 ```
-5. 啟動kubelet
+6. 啟動kubelet
 ```bash
 systemctl start kubelet
 systemctl enable kubelet
 ```
-6. 確保網路不會被iptables略過
+7. 確保網路不會被iptables略過
 ```bash
 vim /etc/sysctl.d/k8s.conf
 
@@ -64,14 +68,29 @@ net.bridge.bridge-nf-call-iptables = 1
 
 sysctl --system
 ```
-`這邊因為還沒初始化的關係，kubelet會啟動失敗`  
+`這邊因為還沒初始化的關係，kubelet會啟動失敗`
 
-7. 增加自動補齊功能
+8. 關閉swap
+```
+# vim /etc/fstab
+...
+#/dev/mapper/centos-swap swap                    swap    defaults        0 0
+(註解此行)
+...
+
+swapon -s
+swapoff -a
+```
+
+9. 關閉防火牆
+  * firewalld跟iptables都關閉
+
+10. 增加自動補齊功能
 ```
 $ echo 'source <(kubectl completion bash)' >> ~/.bashrc
 source ~/.bashrc
 ```
-8. 重開機吧 reboot
+11. 重開機吧 reboot
 
 ## 簡單介紹k8s的兩個主要指令
 * kubeadm：建立節點必備，可以快速幫助你建立 Master 以及增加 Node
@@ -383,6 +402,27 @@ $ kubectl get service -n kube-system
 NAME                   TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)                  AGE
 kube-dns               ClusterIP   10.96.0.10     <none>        53/UDP,53/TCP,9153/TCP   8d
 kubernetes-dashboard   NodePort    10.103.165.8   <none>        80:30773/TCP             4m2s
+```
+3. 若是出現權限問題，就幫他增加權限
+```
+# vim dashboard-admin.yaml
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kubernetes-dashboard
+  labels:
+    k8s-app: kubernetes-dashboard
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: kubernetes-dashboard
+  namespace: kube-system
+  
+kubectl create -f dashboard.yaml
 ```
 ### 參考資料 ###
 * K8S建立：https://kubernetes.io/docs/setup/independent/install-kubeadm/  
