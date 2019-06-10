@@ -1,3 +1,5 @@
+# 首先建立三台虛擬機
+
 # Kubernetes
 ![alt K8S][id]
 
@@ -57,7 +59,12 @@ sysctl --system
 ```
 *這邊因為還沒初始化的關係，kubelet會啟動失敗  
 
-* 重開機吧 reboot
+7. 增加自動補齊功能
+```
+$ echo 'source <(kubectl completion bash)' >> ~/.bashrc
+source ~/.bashrc
+```
+8. 重開機吧 reboot
 
 ## 簡單介紹k8s的兩個主要指令
 * kubeadm：建立節點必備，可以快速幫助你建立 Master 以及增加 Node
@@ -226,6 +233,129 @@ status:
 ```
 5. 接著就可以從外部連接上container
 http://自己的IP:port
+
+## 部屬環境的好幫手Deployment
+#### k8s提供的deployment可以做到以下的事情:  
+* 建立pod
+* 升級到某個版本
+* 回朔到某個版本  
+
+#### deployment主要管理的兩個單位:
+* pods：k8s的最小單位
+* Replicaset：升級以及回朔的方便工具  
+一樣用yaml建立Deployment：
+```
+$ vim my-deployment.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.7.9
+        ports:
+        - containerPort: 80
+```
+1. 建立Deployment
+```bash
+$ kubectl create -f my-deployment.yaml --record
+
+deployment.apps/my-deployment creat
+```
+
+2. 檢查Deployment是否建立成功
+```bash
+$ kubectl get deployments.apps,pods -o wide
+
+NAME                            READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES        SELECTOR
+deployment.apps/my-deployment   2/2     2            2           50s   nginx        nginx:1.7.9   app=nginx
+
+NAME                                READY   STATUS    RESTARTS   AGE   IP            NODE   NOMINATED NODE   READINESS GATES
+pod/hello-kubernetes                1/1     Running   0          24h   10.244.1.37   k8s1   <none>           <none>
+pod/my-deployment-6dd86d77d-8n78n   1/1     Running   0          50s   10.244.1.44   k8s1   <none>           <none>
+pod/my-deployment-6dd86d77d-xw8c5   1/1     Running   0          50s   10.244.1.43   k8s1   <none>           <none>
+```
+*被Deployment建立出來的pod的名字格式:[deploymentname]-[亂碼]  
+
+3. 當負載不夠時，可以增加容器
+
+4. 更新系統
+```bash
+$ kubectl set image deployment.apps/my-deployment nginx=nginx:1.17.0 --record
+
+deployment.apps/my-deployment image updated
+
+查看更新狀態
+$ kubectl rollout status deployment my-deployment
+
+Waiting for deployment "my-deployment" rollout to finish: 1 out of 3 new replicas have been updated...
+deployment "my-deployment" successfully rolled out
+```
+
+5. 系統回朔
+當系統崩潰或是版本不穩定就可以用這個功能
+*** 假設系統更新到錯誤版本
+```diff
+$ kubectl set image deployment.apps/my-deployment nginx=nginx:10.17.0 --record
+
+$ kubectl rollout status deployment my-deployment
+
+Waiting for deployment "my-deployment" rollout to finish: 1 out of 3 new replicas have been updated...
+(應該會一直卡在這裡...)
+
+$ kubectl  get pods
+NAME                             READY   STATUS             RESTARTS   AGE
+hello-kubernetes                 1/1     Running            0          25h
+- my-deployment-6f6986d7b6-nf24d   0/1     ImagePullBackOff   0          8m31s
+my-deployment-9dd464697-5fcsb    1/1     Running            0          9m45s
+my-deployment-9dd464697-lfl59    1/1     Running            0          10m
+my-deployment-9dd464697-q2knp    1/1     Running            0          9m42s
+
+$ kubectl describe deployments my-deployment
+  查看詳細的資料
+
+$ kubectl rollout history deployment
+  可以看之前做的各種版本，加上 --revision=2可以看該版本更詳細的資訊
+```
+*** 回朔到前個版本
+```
+$ kubectl rollout undo deployment.v1.apps/nginx-deployment
+deployment.extensions/my-deployment rolled back
+
+$ kubectl rollout status deployment my-deployment
+deployment "my-deployment" successfully rolled out
+```
+6. 擴展Deployment
+```bash
+$ kubectl scale deployment --replicas=10 my-deployment
+
+$ kubectl get pods -o wide
+NAME                            READY   STATUS    RESTARTS   AGE   IP            NODE   NOMINATED NODE   READINESS GATES
+hello-kubernetes                1/1     Running   0          25h   10.244.1.37   k8s1   <none>           <none>
+my-deployment-9dd464697-5fcsb   1/1     Running   0          20m   10.244.1.70   k8s1   <none>           <none>
+my-deployment-9dd464697-9w4s6   1/1     Running   0          42s   10.244.1.74   k8s1   <none>           <none>
+my-deployment-9dd464697-bvg89   1/1     Running   0          42s   10.244.1.79   k8s1   <none>           <none>
+my-deployment-9dd464697-lfl59   1/1     Running   0          20m   10.244.1.69   k8s1   <none>           <none>
+my-deployment-9dd464697-mmttv   1/1     Running   0          42s   10.244.1.77   k8s1   <none>           <none>
+my-deployment-9dd464697-mqdgl   1/1     Running   0          42s   10.244.1.78   k8s1   <none>           <none>
+my-deployment-9dd464697-nr7lm   1/1     Running   0          42s   10.244.1.73   k8s1   <none>           <none>
+my-deployment-9dd464697-q2knp   1/1     Running   0          20m   10.244.1.71   k8s1   <none>           <none>
+my-deployment-9dd464697-qgbm9   1/1     Running   0          42s   10.244.1.75   k8s1   <none>           <none>
+my-deployment-9dd464697-s9lxk   1/1     Running   0          42s   10.244.1.76   k8s1   <none>           <none>
+```
 
 ## 安裝 dashboard
 dashboard 是k8s的附加元件，可以讓k8s在網頁上監控及管理。
