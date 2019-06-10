@@ -148,7 +148,7 @@ EOF
 sysctl --system
 ```
 
-## 部屬環境
+## 用k8s製作容器
 pod：最小單位，可用來創建和部署的單元。
 pod可以單獨運行一個容器也可以運行多個容器，運行多個容器時共用 "IP" 以及 "儲存的資源"。  
 ![alt k8s](https://github.com/d93y70123123/Kubernetes/blob/master/module_03_nodes.svg "pods")  
