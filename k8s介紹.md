@@ -57,7 +57,7 @@ net.bridge.bridge-nf-call-iptables = 1
 
 sysctl --system
 ```
-*這邊因為還沒初始化的關係，kubelet會啟動失敗  
+`這邊因為還沒初始化的關係，kubelet會啟動失敗`  
 
 7. 增加自動補齊功能
 ```
@@ -307,7 +307,7 @@ deployment "my-deployment" successfully rolled out
 
 5. 系統回朔
 當系統崩潰或是版本不穩定就可以用這個功能
-*** 假設系統更新到錯誤版本
+假設系統更新到錯誤版本：
 ```diff
 $ kubectl set image deployment.apps/my-deployment nginx=nginx:10.17.0 --record
 
@@ -330,7 +330,7 @@ $ kubectl describe deployments my-deployment
 $ kubectl rollout history deployment
   可以看之前做的各種版本，加上 --revision=2可以看該版本更詳細的資訊
 ```
-*** 回朔到前個版本
+回朔到前個版本：
 ```
 $ kubectl rollout undo deployment.v1.apps/nginx-deployment
 deployment.extensions/my-deployment rolled back
