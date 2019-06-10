@@ -257,10 +257,11 @@ spec:
 status:
   loadBalancer: {}
 ```
-5. 接著就可以從外部連接上container
-http://自己的IP:port
+5. 接著就可以從外部連接上container  
+在瀏覽器貼打上 > http://自己的IP:port
 
 ## 部屬環境的好幫手Deployment
+![alt k8s-deployment](https://github.com/d93y70123123/Kubernetes/blob/master/deployment-rs-pod.svg "k8s-deployment")
 #### k8s提供的deployment可以做到以下的事情:  
 * 建立pod
 * 升級到某個版本
