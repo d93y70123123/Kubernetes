@@ -102,6 +102,13 @@ source ~/.bashrc
 
 # 建立叢集
 ## Master建立  
+安裝docker 
+```bash
+wget https://download.docker.com/linux/centos/docker-ce.repo -P /etc/yum.repos.d/
+yum install docker-ce docker-ce-cli containerd.io
+systetmctl start docker
+systetmctl enable docker
+```
 1. Master節點初始化
 ```
 kubeadm init --pod-network-cidr=10.244.0.0/16
@@ -144,12 +151,8 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/62e44c867a2846fefb68bd5f178daf4da3095ccb/Documentation/kube-flannel.yml
 ```  
 ## Node建立
-安裝docker 
-```bash
-wget https://download.docker.com/linux/centos/docker-ce.repo -P /etc/yum.repos.d/
-yum install docker-ce docker-ce-cli containerd.io
-systetmctl start docker
-systetmctl enable docker
+```diff
+- 工作節點也需要安裝Ｄocker喔！！  
 ```
 
 重複安裝的步驟，可以將下面的指令段落做成腳本執行  
@@ -268,6 +271,8 @@ spec:
 status:
   loadBalancer: {}
 ```
+* 在本機上要開啟port才能對外開放
+`iptables -t nat -A PREROUTING -i eno1 -p tcp -m tcp --dport [port] -j DNAT --to-destination 192.168.19.X:[port]`
 5. 接著就可以從外部連接上container  
 在瀏覽器貼打上 > http://自己的IP:port
 
