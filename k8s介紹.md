@@ -62,7 +62,6 @@ net.bridge.bridge-nf-call-iptables = 1
 
 sysctl --system
 ```
-`這邊因為還沒初始化的關係，kubelet會啟動失敗`
 
 5. 新增容器庫
 ```bash
@@ -88,6 +87,7 @@ yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
 systemctl start kubelet
 systemctl enable kubelet
 ```
+`這邊因為還沒初始化的關係，kubelet會啟動失敗`  
 
 9. 增加自動補齊功能
 ```
@@ -106,8 +106,8 @@ source ~/.bashrc
 ```bash
 wget https://download.docker.com/linux/centos/docker-ce.repo -P /etc/yum.repos.d/
 yum install docker-ce docker-ce-cli containerd.io
-systetmctl start docker
-systetmctl enable docker
+systemctl start docker
+systemctl enable docker
 ```
 1. Master節點初始化
 ```
