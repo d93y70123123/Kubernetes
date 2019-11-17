@@ -153,6 +153,7 @@ kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/62e44c867a2846
 ## Node建立
 ```diff
 - 工作節點也需要安裝Ｄocker喔！！  
+asdasdasd
 ```
 
 重複安裝的步驟，可以將下面的指令段落做成腳本執行  
